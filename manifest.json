@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "智能Markdown助手（支持ChatGPT）",
+  "version": "1.0",
+  "description": "一款功能强大的侧边栏Markdown编辑器，支持ChatGPT智能助手，提供快速编辑和预览markdown等功能，让您的Markdown书写更高效！",
+  "author": "Jeff",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "image_orange_red.png",
+    "48": "image_orange_red.png",
+    "128": "image_orange_red.png"
+  },
+  "action": {
+    "default_title": "Markdown Editor",
+    "default_icon":{
+      "16": "sidebarnote-disactive.png",
+      "32": "sidebarnote-disactive.png",
+      "48": "sidebarnote-disactive.png",
+      "128": "sidebarnote-disactive.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "sidebar.html",
+        "sidebar.js",
+        "styles.css",
+        "github-markdown.css",
+        "marked.min.js",
+        "floatingBall.css",
+        "turndown.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["floatingBall.css"]
+    
+    }
+  ]
+}

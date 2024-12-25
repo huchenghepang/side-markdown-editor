@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <div class="md-sidebar">
+    <div class="sidebar-header">
+      <h3 class="md-sidebar-title"><span id="md-sidebar-close" class="md-sidebar-close" class="icon">❌&nbsp;</span>笔记本<span class="icon">📒</span></h3>
+      <div class="view-controls">
+        <button id="toggleFileExplorer"  class="view-control-btn active" title="显示/隐藏文件目录">
+          <span class="icon">📁</span>
+        </button>
+        <button id="toggleEditor" class="view-control-btn active" title="显示/隐藏编辑器">
+          <span class="icon">✏️</span>
+        </button>
+        <button id="togglePreview" class="view-control-btn active" title="显示/隐藏预览">
+          <span class="icon">👁️</span>
+        </button>
+
+      </div>
+      <div class="size-controls">
+        <button id="sizeSmall" class="size-btn" title="小尺寸 (30%)">S</button>
+        <button id="sizeMedium" class="size-btn active" title="中等尺寸 (50%)">M</button>
+        <button id="sizeLarge" class="size-btn" title="大尺寸 (70%)">L</button>
+        <button id="sizeFull" class="size-btn" title="全屏 (90%)">F</button>
+      </div>
+    </div>
+    <div class="main-container">
+      <div id="fileExplorerSection" class="section file-explorer-section">
+        <div class="file-explorer-header">
+          <button id="openFolderBtn" class="control-btn">
+            <span class="icon">📁</span>
+            打开文件夹
+          </button>
+        </div>
+        <div id="fileTree" class="md-file-tree"></div>
+      </div>
+      <div class="resizer file-explorer-resizer"></div>
+      <div id="editorSection" class="section editor-section">
+        <div class="editor-left-resizer"></div>
+        <div class="editor-toolbar">
+            <div class="heading-dropdown">
+                <button class="toolbar-btn" title="标题" data-format="heading">H</button>
+                <div class="heading-menu">
+                    <button class="heading-item" data-level="1">H1</button>
+                    <button class="heading-item" data-level="2">H2</button>
+                    <button class="heading-item" data-level="3">H3</button>
+                    <button class="heading-item" data-level="4">H4</button>
+                    <button class="heading-item" data-level="5">H5</button>
+                    <button class="heading-item" data-level="6">H6</button>
+                </div>
+            </div>
+            <button class="toolbar-btn" title="粗体" data-format="bold">B</button>
+            <button class="toolbar-btn" title="斜体" data-format="italic">I</button>
+            <button class="toolbar-btn" title="链接" data-format="link">🔗</button>
+            <button class="toolbar-btn" title="图片" data-format="image">📷</button>
+            <button class="toolbar-btn" title="代码块" data-format="code">📝</button>
+            <button class="toolbar-btn" title="无序列表" data-format="ul">•</button>
+            <button class="toolbar-btn" title="有序列表" data-format="ol">1.</button>
+            <button class="toolbar-btn" title="任务列表" data-format="task">☐</button>
+            <button class="toolbar-btn" title="表格" data-format="table">📊</button>
+            <button class="toolbar-btn" title="引用" data-format="quote">❝</button>
+            <button class="toolbar-btn" title="分割线" data-format="hr">—</button>
+        </div>
+        <textarea id="notepad" placeholder="在这里写下你的Markdown笔记..."></textarea>
+      </div>
+      <div class="resizer editor-resizer"></div>
+      <div id="previewSection" class="section preview-section markdown-body">
+        <div class="preview-left-resizer"></div>
+        <div id="preview"></div>
+      </div>
+    </div>
+    <div class="button-group">
+      <div class="save-buttons">
+        <button id="saveBtn" class="control-btn">
+          <span class="icon">💾</span>
+          保存
+        </button>
+        <button id="saveAsBtn" class="control-btn">
+          <span class="icon">📥</span>
+          另存为
+        </button>
+        <button id="createNewArticle" class="control-btn my-control-btn" >
+          <span class="icon">✍️</span>
+          创建新笔记
+        </button>
+        <button id="md-chatgptTomarkdown" class="control-btn">
+          <span class="icon">📥</span>
+          导入chatgpt
+        </button>
+      </div>
+    </div>
+    <div class="sidebar-resizer"></div>
+  </div>
+
+  <div id="contextMenu" class="context-menu">
+    <div class="menu-item" data-action="rename">
+        <span class="menu-icon">✏️</span>
+        重命名
+    </div>
+    <div class="menu-item" data-action="duplicate">
+        <span class="menu-icon">📋</span>
+        复制
+    </div>
+    <div class="menu-item" data-action="delete">
+        <span class="menu-icon">🗑️</span>
+        删除
+    </div>
+  </div>
+
+  <script src="marked.min.js"></script>
+  <script src="fileTree.js"></script>
+  <script src="sidebar.js"></script>
+  <script src="floatingBall.js"></script>
+  <script>
+    // 等待 DOM 加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取按钮元素
+      const saveBtn = document.getElementById('saveBtn');
+      const saveAsBtn = document.getElementById('saveAsBtn');
+
+      // 保存按钮点击事件
+      saveBtn.addEventListener('click', function() {
+        const content = document.getElementById('notepad').value;
+        if (!content.trim()) {
+          alert('笔记内容不能为空！');
+          return;
+        }
+        downloadFile('note.md', content);
+      });
+
+      // 另存为按钮点击事件
+      saveAsBtn.addEventListener('click', function() {
+        const content = document.getElementById('notepad').value;
+        if (!content.trim()) {
+          alert('笔记内容不能为空！');
+          return;
+        }
+        
+  
+        
+        if (!fileName.toLowerCase().endsWith('.md')) {
+          alert('文件名必须以.md结尾');
+          return;
+        }
+        
+        downloadFile(fileName, content);
+      });
+
+      // 下载文件函数
+      function downloadFile(fileName, content) {
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    });
+  </script>
+</body>
+</html> 

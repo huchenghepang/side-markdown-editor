@@ -1,0 +1,1410 @@
+
+
+.sidebar-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 1000;
+}
+
+.sidebar-resizer:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-resizer.dragging {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 50%;  /* 默认宽度 */
+    background: #fff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.1s ease;
+}
+
+#markdown-sidebar-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 50%;
+    min-width: 50px;
+    overflow-x: auto;
+    z-index: 9999;
+    transition: width 0.3s ease;
+    color: #fafafa;
+}
+
+.md-sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    background: #333;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.drag-handle {
+    position: absolute;
+    top: 0;
+    left: -8px;
+    bottom: 0;
+    width: 16px;
+    cursor: ew-resize;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drag-handle:hover,
+.sidebar.dragging .drag-handle {
+
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.drag-handle::after {
+    content: '';
+    width: 4px;
+    height: 100%;
+    background: #e0e0e0;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+}
+
+.drag-handle:hover::after,
+.sidebar.dragging .drag-handle::after {
+    background-color: #4CAF50;
+}
+
+.sidebar-content {
+    margin-left: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    transform: translateX(100%);
+}
+
+.sidebar.collapsed .drag-handle {
+    left: -12px;
+}
+
+.sidebar.resizing {
+    transition: none;
+    user-select: none;
+}
+
+.sidebar-header {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.notes-container {
+    padding: 15px;
+}
+
+#notepad {
+    width: 100%;
+    height: 300px;
+    resize: vertical;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #333;
+}
+
+#saveBtn {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#saveBtn:hover {
+    background: #45a049;
+}
+
+.file-explorer {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.file-explorer-header {
+    margin-bottom: 10px;
+}
+
+.file-item,
+.folder-item {
+    margin: 2px 0;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.item-content:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.folder-icon {
+    margin-right: 5px;
+    font-size: 12px;
+    width: 12px;
+    display: inline-block;
+}
+
+.item-name {
+    flex: 1;
+}
+
+.folder-content {
+    display: none;
+    margin-left: 20px;
+}
+
+.folder-item.expanded>.folder-content {
+    display: block;
+}
+
+.error {
+    color: #ff4444;
+    padding: 8px;
+}
+
+.folder-item {
+    cursor: pointer;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+}
+
+.folder-icon {
+    margin-right: 5px;
+    font-size: 12px;
+    width: 12px;
+    display: inline-block;
+}
+
+.file-item {
+    padding: 4px 8px 4px 25px;
+    cursor: pointer;
+}
+
+.folder-content {
+    display: none;
+    margin-left: 20px;
+}
+
+.folder-item.expanded>.folder-content {
+    display: block;
+}
+
+.error {
+    color: #ff4444;
+    padding: 8px;
+}
+
+#markdown-sidebar-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+    height: 100vh;
+}
+
+.md-sidebar {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.file-explorer {
+    flex: 0 0 200px;
+    overflow-y: auto;
+}
+
+.notes-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.editor-section {
+    flex: 1;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+#notepad {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 10px;
+    box-sizing: border-box;
+    color: #fafafa;
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.preview-section {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    min-height: 200px;
+    border-left: 1px solid #ddd;
+}
+
+.markdown-body {
+    padding: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.button-group {
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #eee;
+}
+
+.button-group button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button-group button:hover {
+    background-color: #45a049;
+}
+
+.file-explorer {
+    height: 200px;
+    overflow-y: auto;
+    border-bottom: 1px solid #eee;
+}
+
+.md-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar-header {
+    flex-shrink: 0;
+}
+
+.file-item,
+.folder-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.file-item:hover,
+.folder-item:hover {
+    background-color: #f0f0f0;
+}
+
+.file-icon,
+.folder-icon {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.item-name {
+    flex: 1;
+}
+
+.folder-content {
+    margin-left: 20px;
+}
+
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 确保内容区域正确响应宽度变化 */
+.editor-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-section,
+.preview-section {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #333;
+}
+
+/* 优化文件树样式 */
+.file-explorer {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* 优化按钮组样式 */
+.button-group {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+/* 当侧边栏折叠时保持拖动功能 */
+.sidebar.collapsed {
+    transform: translateX(calc(100% - 4px));
+}
+
+.sidebar.collapsed::before {
+    width: 4px;
+    background: #f0f0f0;
+}
+
+/* 优化文本编辑器和预览区域的滚动 */
+#notepad,
+.preview-section {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 确保内容不会溢出 */
+.item-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 视图控制按钮样式 */
+.view-controls {
+    display: flex;
+    gap: 8px;
+    margin: 0 15px;
+}
+
+.view-control-btn {
+    padding: 4px 8px;
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+.view-control-btn.active {
+    opacity: 1;
+    background: #f0f0f0;
+}
+
+.view-control-btn:hover {
+    background: #e0e0e0;
+}
+
+.view-control-btn .icon {
+    font-size: 16px;
+}
+
+/* 主容器布局 */
+.main-container {
+    display: flex;
+    position: relative;
+    height: calc(100% - 100px); /* 减去header和button-group的高度 */
+    overflow: hidden;
+}
+
+/* 区域样式 */
+.section {
+    position: relative;
+    height: 100%;
+    min-width: 0; /* 允许区域缩小 */
+}
+
+/* 隐藏状态 */
+.section.hidden {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* 文件浏览区域 */
+.file-explorer-section {
+    width: 250px;
+    min-width: 100px;
+    max-width: 500px;
+    flex-shrink: 0;
+}
+
+/* 编辑器区域 */
+.editor-section {
+    width: 40%;
+    min-width: 200px;
+    flex-shrink: 0;
+    border-left: 1px solid #ddd;
+}
+
+/* 预览区域 */
+.preview-section {
+    width: 40%;
+    min-width: 100px;
+    flex-shrink: 0;
+    position: relative;
+    background: #fafafa;
+}
+
+/* 控制按钮样式 */
+.view-control-btn {
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.view-control-btn.active {
+    opacity: 1;
+    background: #e0e0e0;
+    border-color: #4CAF50;
+}
+
+.size-btn {
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #333;
+    font-weight: bold;
+}
+
+.size-btn.active {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.md-sidebar {
+    position: relative;
+}
+
+.sidebar-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    cursor: col-resize;
+    z-index: 1000;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging {
+    background: #999;
+}
+
+
+
+.main-container {
+    position: relative;
+    display: flex;
+    flex: 1;
+}
+
+.container-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    cursor: col-resize;
+    z-index: 1000;
+}
+
+.container-resizer:hover,
+.container-resizer.dragging {
+    background: #999;
+}
+
+.file-explorer-section {
+    min-width: 100px;
+    max-width: 500px;
+    transition: width 0.3s;
+}
+
+.floating-ball {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1000;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.floating-ball:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.floating-ball.dragging {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.ball-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* 文件树样式 */
+.folder-content {
+    margin-left: 20px; /* 缩进子项 */
+    border-left: 1px dotted #555; /* 添加垂直连接线 */
+    padding-left: 5px;
+}
+
+.file-item, .folder-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    display: block; /* 改为块级显示 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-item:hover, .folder-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.file-icon, .folder-icon {
+    width: 16px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.item-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 折叠/展开动画 */
+.folder-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.folder-item.expanded > .folder-content {
+    max-height: 1000px; /* 或者更大的值，取决于内容 */
+}
+
+/* 活动项目高亮 */
+.file-item.active, .folder-item.active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 文件树容器 */
+#fileTree {
+    height: calc(100% - 80px);
+    overflow-y: auto;
+    padding: 8px 0;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 滚动条样式 */
+#fileTree::-webkit-scrollbar {
+    width: 6px;
+}
+
+#fileTree::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#fileTree::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+#fileTree::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#openFolderBtn {
+    padding: 8px 12px;
+    background: #4a4a4a;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+#openFolderBtn:hover {
+    background: #5a5a5a;
+}
+
+#openFolderBtn .icon {
+    font-size: 16px;
+}
+
+.button-group {
+    padding: 8px;
+    border-top: 1px solid #444;
+}
+
+#saveBtn {
+    width: 100%;
+    padding: 8px 12px;
+    background: #4a4a4a;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+#saveBtn:hover {
+    background: #5a5a5a;
+}
+
+#saveBtn .icon {
+    font-size: 16px;
+}
+
+#saveBtn:disabled {
+    background: #333;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.save-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.save-buttons .control-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: #4a4a4a;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+.save-buttons .control-btn:hover {
+    background: #5a5a5a;
+}
+
+.save-buttons .control-btn:disabled {
+    background: #333;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* 保存对话框样式 */
+.save-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.save-dialog {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.save-dialog h3 {
+    margin: 0 0 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.form-group input {
+    width: calc(100% - 40px);
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.extension {
+    color: #666;
+    margin-left: 5px;
+}
+
+.location-info {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.folder-icon {
+    margin-right: 8px;
+}
+
+.current-path {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.change-location-btn {
+    padding: 4px 8px;
+    background: #4a4a4a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.change-location-btn:hover {
+    background: #5a5a5a;
+}
+
+.save-dialog .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.save-dialog .button-group button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.save-dialog .save-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.save-dialog .save-btn:hover {
+    background: #45a049;
+}
+
+.save-dialog .cancel-btn {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.save-dialog .cancel-btn:hover {
+    background: #e8e8e8;
+}
+
+.dialog-buttons {
+    margin-top: 20px;
+}
+
+.download-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.download-option input[type="checkbox"] {
+    margin: 0;
+}
+
+/* 自定义对话框样式 */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.dialog-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dialog-title {
+    margin: 0 0 15px;
+    color: #333;
+    font-size: 16px;
+}
+
+.dialog-content {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.dialog-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.dialog-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.dialog-btn-primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.dialog-btn-primary:hover {
+    background: #45a049;
+}
+
+.dialog-btn-secondary {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.dialog-btn-secondary:hover {
+    background: #e8e8e8;
+}
+
+/* 添加消息对话框样式 */
+.dialog-message {
+    margin: 0;
+    color: #333;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px 0;
+}
+
+/* 修改调整器样式 */
+.resizer {
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    cursor: ew-resize;
+    position: absolute;
+    z-index: 1000;
+    transition: background-color 0.2s;
+}
+
+.resizer:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.resizer:active {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* 调整各区域的样式 */
+.section {
+    position: relative;
+    height: 100%;
+    transition: width 0.1s ease;
+}
+
+.section.resizing {
+    transition: none;
+    user-select: none;
+}
+
+/* 确保内容不会溢出 */
+.section {
+    overflow: hidden;
+}
+
+/* 调整预览区域的滚动 */
+.preview-section {
+    overflow-y: auto;
+}
+
+/* 优化拖动时的视觉效果 */
+.section.resizing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+}
+
+/* 编辑器左侧调整器样式 */
+.editor-left-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    cursor: ew-resize;
+    z-index: 1000;
+    transition: background-color 0.2s;
+}
+
+.editor-left-resizer:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.editor-left-resizer:active {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* 调整编辑器区域样式 */
+.editor-section {
+    position: relative;
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 确保文本区域填满编辑器区域 */
+#notepad {
+    flex: 1;
+    margin: 0;
+    border: none;
+    padding: 10px;
+    resize: none;
+    outline: none;
+}
+
+/* 预览区域左侧调整器样式 */
+.preview-left-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    cursor: ew-resize;
+    z-index: 1000;
+    transition: background-color 0.2s;
+}
+
+.preview-left-resizer:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.preview-left-resizer:active {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+
+#previewSection{
+    background-color: #555;
+}
+
+
+/* 调整预览区域样式 */
+.preview-section {
+    position: relative;
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+}
+
+#preview {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #555;
+    color: #fafafa;
+    font-family: 'Roboto Mono', 'Fira Code', monospace;
+}
+
+/* 调整主容器布局 */
+.main-container {
+    display: flex;
+    position: relative;
+    height: calc(100% - 100px); /* 减去header和button-group的高度 */
+    overflow: hidden;
+}
+
+/* 调整各区域的基础样式 */
+.section {
+    position: relative;
+    height: 100%;
+    min-width: 0; /* 允许区域缩小 */
+}
+
+/* 文件浏览器区域 */
+.file-explorer-section {
+    width: 250px;
+    min-width: 100px;
+    max-width: 500px;
+    flex-shrink: 0;
+}
+
+/* 编辑器区域 */
+.editor-section {
+    width: 40%;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+/* 预览区域 */
+.preview-section {
+    width: 40%;
+    min-width: 100px;
+    flex-shrink: 0;
+    position: relative;
+    background: #fafafa;
+}
+
+/* 调整预览内容容器 */
+#preview {
+    height: 100%;
+    padding: 10px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* 调整器通用样式 */
+.resizer,
+.editor-left-resizer,
+.preview-left-resizer {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    cursor: ew-resize;
+    z-index: 1000;
+    transition: background-color 0.2s;
+}
+
+.resizer:hover,
+.editor-left-resizer:hover,
+.preview-left-resizer:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.resizer:active,
+.editor-left-resizer:active,
+.preview-left-resizer:active {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* 调整器位置 */
+.file-explorer-resizer {
+    right: 0;
+}
+
+.editor-resizer {
+    right: 0;
+}
+
+.editor-left-resizer,
+.preview-left-resizer {
+    left: 0;
+}
+
+/* 添加禁用文本选择的样式类 */
+.disable-selection {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+}
+
+/* 确保拖动时不会选中文本 */
+.resizing * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+}
+
+
+.md-sidebar-close {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* 编辑器工具栏样式 */
+.editor-toolbar {
+    padding: 8px;
+    background: #333;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.toolbar-btn {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+    background: #e0e0e0;
+    
+    border-color: #bbb;
+}
+
+.toolbar-btn:active {
+    background: #d0d0d0;
+    transform: translateY(1px);
+}
+
+/* 标题下拉菜单样式 */
+.heading-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.heading-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 60px;
+}
+
+.heading-dropdown:hover .heading-menu {
+    display: block;
+}
+
+.heading-item {
+    display: block;
+    width: 100%;
+    padding: 4px 8px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.heading-item:hover {
+    background: #f0f0f0;
+}
+
+/* 预览时的标题样式 */
+.markdown-body h1 { font-size: 2em; }
+.markdown-body h2 { font-size: 1.5em; }
+.markdown-body h3 { font-size: 1.25em; }
+.markdown-body h4 { font-size: 1em; }
+.markdown-body h5 { font-size: 0.875em; }
+.markdown-body h6 { font-size: 0.85em; }
+
+/* 右键菜单样式 */
+.context-menu {
+    display: none;
+    position: fixed;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 4px 0;
+    min-width: 150px;
+    z-index: 10000;
+    user-select: none;
+}
+
+.menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.menu-item:hover {
+    background: #f5f5f5;
+}
+
+.menu-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* 文件树项目激活状态 */
+.file-item.active, .folder-item.active {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 确保菜单不会被其他元素遮挡 */
+#contextMenu {
+    position: fixed;
+    z-index: 10000;
+}
+
+
+.my-control-btn{
+    width: 200px;
+    height: 60px;
+}
+
+
+
+/* 代码区域的样式 */
+
+pre{
+    background-color: #333 !important;
+}
+
