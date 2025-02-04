@@ -1,5 +1,4 @@
 let sidebarStates = new Map(); // 存储每个标签页的侧边栏状态
-
 // 监听扩展图标点击事件
 chrome.action.onClicked.addListener(async function (tab) {
     try {
@@ -37,339 +36,352 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 });
 
 async function injectResources(tab) {
-    // 注入HTML
-    const response = await fetch(chrome.runtime.getURL('sidebar.html'));
-    const html = await response.text();
+    try {
 
-    await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: (htmlContent) => {
-            const div = document.createElement('div');
-            div.id = 'markdown-sidebar-container';
-            // div.style.display = ''; // 确保初始可见
-            div.innerHTML = htmlContent;
-            document.body.appendChild(div);
-            const closeButton = document.getElementById('md-sidebar-close');
-            if (closeButton) {
-                closeButton.addEventListener('click', () => {
-                    chrome.runtime.sendMessage({ type: 'toggleSidebar', visible: false });
-                });
-            }
-        },
-        args: [html]
-    });
+        // 注入HTML
+        const response = await fetch(chrome.runtime.getURL('sidebar.html'));
+        const html = await response.text();
 
-    // 注入CSS
-    await chrome.scripting.insertCSS({
-        target: { tabId: tab.id },
-        files: ['styles.css', 'github-markdown.css']
-    });
-
-    // 注入JavaScript
-    await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['marked.min.js']
-    });
-
-
-    /* 判断当前网站是否是chatgpt官网，如果是则注入资源 */
-    const url = window.location.href;
-    if (url.includes('chatgpt.com')) {
-        /* 注入turndown转化html为markdown的脚本 */
         await chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            files: ['turndown.js'],
-        })
-    }
-
-
-    // 注入主要功能代码
-    await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-            class FileExplorer {
-                constructor() {
-                    this.initializeWhenReady();
+            func: (htmlContent) => {
+                const div = document.createElement('div');
+                div.id = 'markdown-sidebar-container';
+                /* 新增拖动效果 */
+                // div.style.display = ''; // 确保初始可见
+                div.innerHTML = htmlContent;
+                document.body.appendChild(div);
+                const closeButton = document.getElementById('md-sidebar-close');
+                if (closeButton) {
+                    closeButton.addEventListener('click', () => {
+                        chrome.runtime.sendMessage({ type: 'toggleSidebar', visible: false });
+                    });
                 }
+            },
+            args: [html]
+        });
 
-                initializeWhenReady() {
-                    if (this.checkElementsExist()) {
-                        this.initialize();
-                        return;
+        // 注入CSS
+        await chrome.scripting.insertCSS({
+            target: { tabId: tab.id },
+            files: ['styles.css', 'github-markdown.css']
+        });
+
+        // 注入JavaScript
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['marked.min.js']
+        });
+
+
+        /* 判断当前网站是否是chatgpt官网，如果是则注入资源 */
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const currentTab = tabs[0];
+            const url = currentTab.url;
+
+            if (url.includes('chatgpt.com')) {
+                console.log('当前网站是 ChatGPT 官网');
+
+                // 注入脚本
+                chrome.scripting.executeScript({
+                    target: { tabId: currentTab.id },
+                    files: ['turndown.js'],
+                });
+            }
+        });
+
+
+        // 注入主要功能代码
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                class FileExplorer {
+                    constructor() {
+                        this.initializeWhenReady();
                     }
 
-                    const observer = new MutationObserver((mutations, obs) => {
+                    initializeWhenReady() {
                         if (this.checkElementsExist()) {
-                            obs.disconnect();
                             this.initialize();
+                            return;
                         }
-                    });
 
-                    observer.observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    });
-                }
+                        const observer = new MutationObserver((mutations, obs) => {
+                            if (this.checkElementsExist()) {
+                                obs.disconnect();
+                                this.initialize();
+                            }
+                        });
 
-                checkElementsExist() {
-                    return document.getElementById('fileTree') &&
-                        document.getElementById('contextMenu');
-                }
-
-                initialize() {
-                    this.currentPath = null;
-                    this.fileTree = document.getElementById('fileTree');
-                    this.openFolderBtn = document.getElementById('openFolderBtn');
-                    this.notepad = document.getElementById('notepad');
-                    this.preview = document.getElementById('preview');
-                    this.saveBtn = document.getElementById('saveBtn');
-                    this.saveAsBtn = document.getElementById('saveAsBtn');
-                    this.currentFile = null;
-
-                    // 确保所有元素都存在
-                    if (!this.fileTree || !this.openFolderBtn || !this.notepad ||
-                        !this.preview || !this.saveBtn || !this.saveAsBtn) {
-                        console.error('找不到必要的DOM元素');
-                        return;
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true
+                        });
                     }
 
-                    this.setupEventListeners();
-                    console.log('FileExplorer initialized'); // 添加调试日志
+                    checkElementsExist() {
+                        return document.getElementById('fileTree') &&
+                            document.getElementById('contextMenu');
+                    }
 
-                    // 添加右键菜单事件处理
-                    document.addEventListener('contextmenu', async (e) => {
-                        const fileItem = e.target.closest('.file-item, .folder-item');
-                        if (fileItem) {
-                            e.preventDefault();
-                            e.stopPropagation();
+                    initialize() {
+                        this.currentPath = null;
+                        this.fileTree = document.getElementById('fileTree');
+                        this.openFolderBtn = document.getElementById('openFolderBtn');
+                        this.notepad = document.getElementById('notepad');
+                        this.preview = document.getElementById('preview');
+                        this.saveBtn = document.getElementById('saveBtn');
+                        this.saveAsBtn = document.getElementById('saveAsBtn');
+                        this.currentFile = null;
 
+                        // 确保所有元素都存在
+                        if (!this.fileTree || !this.openFolderBtn || !this.notepad ||
+                            !this.preview || !this.saveBtn || !this.saveAsBtn) {
+                            console.error('找不到必要的DOM元素');
+                            return;
+                        }
+
+                        this.setupEventListeners();
+                        console.log('FileExplorer initialized'); // 添加调试日志
+
+                        // 添加右键菜单事件处理
+                        document.addEventListener('contextmenu', async (e) => {
+                            const fileItem = e.target.closest('.file-item, .folder-item');
+                            if (fileItem) {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                const contextMenu = document.getElementById('contextMenu');
+                                if (contextMenu) {
+                                    // 移除所有项目的激活状态
+                                    document.querySelectorAll('.file-item, .folder-item').forEach(item => {
+                                        item.classList.remove('active');
+                                    });
+
+                                    // 添加当前项目的激活状态
+                                    fileItem.classList.add('active');
+
+                                    // 获取文件/文件夹信息
+                                    const entry = {
+                                        name: fileItem.dataset.name,
+                                        kind: fileItem.dataset.type
+                                    };
+
+                                    // 如果是文件，获取文件内容
+                                    if (entry.kind === 'file') {
+                                        try {
+                                            const fileHandle = await this.currentPath.getFileHandle(entry.name);
+                                            const file = await fileHandle.getFile();
+                                            entry.content = await file.text();
+                                        } catch (err) {
+                                            console.error('获取文件内容失败:', err);
+                                        }
+                                    }
+
+                                    // 计算菜单位置，确保不超出视口
+                                    const menuWidth = contextMenu.offsetWidth;
+                                    const menuHeight = contextMenu.offsetHeight;
+                                    const viewportWidth = window.innerWidth;
+                                    const viewportHeight = window.innerHeight;
+
+                                    let x = e.clientX;
+                                    let y = e.clientY;
+
+                                    // 如果菜单会超出右边界，则向左显示
+                                    if (x + menuWidth > viewportWidth) {
+                                        x = viewportWidth - menuWidth;
+                                    }
+
+                                    // 如果菜单会超出下边界，则向上显示
+                                    if (y + menuHeight > viewportHeight) {
+                                        y = viewportHeight - menuHeight;
+                                    }
+
+                                    // 显示菜单
+                                    contextMenu.style.display = 'block';
+                                    contextMenu.style.left = `${x}px`;
+                                    contextMenu.style.top = `${y}px`;
+
+                                    // 绑定菜单项点击事件
+                                    contextMenu.querySelectorAll('.menu-item').forEach(item => {
+                                        const action = item.dataset.action;
+                                        item.onclick = () => {
+                                            contextMenu.style.display = 'none';
+                                            chrome.runtime.sendMessage({
+                                                type: 'handleMenuAction',
+                                                action: action,
+                                                entry: entry
+                                            });
+                                        };
+                                    });
+                                }
+                            }
+                        });
+
+                        // 点击其他区域关闭菜单
+                        document.addEventListener('click', (e) => {
                             const contextMenu = document.getElementById('contextMenu');
-                            if (contextMenu) {
+                            if (contextMenu && !e.target.closest('.context-menu')) {
+                                contextMenu.style.display = 'none';
                                 // 移除所有项目的激活状态
                                 document.querySelectorAll('.file-item, .folder-item').forEach(item => {
                                     item.classList.remove('active');
                                 });
-
-                                // 添加当前项目的激活状态
-                                fileItem.classList.add('active');
-
-                                // 获取文件/文件夹信息
-                                const entry = {
-                                    name: fileItem.dataset.name,
-                                    kind: fileItem.dataset.type
-                                };
-
-                                // 如果是文件，获取文件内容
-                                if (entry.kind === 'file') {
-                                    try {
-                                        const fileHandle = await this.currentPath.getFileHandle(entry.name);
-                                        const file = await fileHandle.getFile();
-                                        entry.content = await file.text();
-                                    } catch (err) {
-                                        console.error('获取文件内容失败:', err);
-                                    }
-                                }
-
-                                // 计算菜单位置，确保不超出视口
-                                const menuWidth = contextMenu.offsetWidth;
-                                const menuHeight = contextMenu.offsetHeight;
-                                const viewportWidth = window.innerWidth;
-                                const viewportHeight = window.innerHeight;
-
-                                let x = e.clientX;
-                                let y = e.clientY;
-
-                                // 如果菜单会超出右边界，则向左显示
-                                if (x + menuWidth > viewportWidth) {
-                                    x = viewportWidth - menuWidth;
-                                }
-
-                                // 如果菜单会超出下边界，则向上显示
-                                if (y + menuHeight > viewportHeight) {
-                                    y = viewportHeight - menuHeight;
-                                }
-
-                                // 显示菜单
-                                contextMenu.style.display = 'block';
-                                contextMenu.style.left = `${x}px`;
-                                contextMenu.style.top = `${y}px`;
-
-                                // 绑定菜单项点击事件
-                                contextMenu.querySelectorAll('.menu-item').forEach(item => {
-                                    const action = item.dataset.action;
-                                    item.onclick = () => {
-                                        contextMenu.style.display = 'none';
-                                        chrome.runtime.sendMessage({
-                                            type: 'handleMenuAction',
-                                            action: action,
-                                            entry: entry
-                                        });
-                                    };
-                                });
                             }
-                        }
-                    });
+                        });
+                    }
 
-                    // 点击其他区域关闭菜单
-                    document.addEventListener('click', (e) => {
-                        const contextMenu = document.getElementById('contextMenu');
-                        if (contextMenu && !e.target.closest('.context-menu')) {
-                            contextMenu.style.display = 'none';
-                            // 移除所有项目的激活状态
-                            document.querySelectorAll('.file-item, .folder-item').forEach(item => {
-                                item.classList.remove('active');
-                            });
-                        }
-                    });
-                }
+                    setupEventListeners() {
+                        console.log('Setting up event listeners'); // 添加调试日志
 
-                setupEventListeners() {
-                    console.log('Setting up event listeners'); // 添加调试日志
-
-                    // 打开文件夹按钮事件
-                    this.openFolderBtn.addEventListener('click', async () => {
-                        console.log('Open folder button clicked'); // 添加调试日志
-                        try {
-                            const dirHandle = await window.showDirectoryPicker();
-                            this.currentPath = dirHandle;
-                            await this.displayFileTree(dirHandle, this.fileTree);
-                        } catch (err) {
-                            console.error('打开文件夹失败:', err);
-                            alert('打开文件夹失败: ' + err.message);
-                        }
-                    });
-
-
-
-
-
-                    // 编辑器内容变化时更新预览
-                    this.notepad.addEventListener('input', () => {
-                        this.preview.innerHTML = marked.parse(this.notepad.value);
-                    });
-
-                    console.log('Event listeners setup completed'); // 添加调试日志
-                }
-
-                async displayFileTree(dirHandle, parentElement) {
-                    try {
-                        parentElement.innerHTML = '';
-
-                        const entries = [];
-                        for await (const entry of dirHandle.values()) {
-                            entries.push(entry);
-                        }
-
-                        // 排序：文件夹在前，文件在后
-                        entries.sort((a, b) => {
-                            if (a.kind !== b.kind) {
-                                return a.kind === 'directory' ? -1 : 1;
+                        // 打开文件夹按钮事件
+                        this.openFolderBtn.addEventListener('click', async () => {
+                            console.log('Open folder button clicked'); // 添加调试日志
+                            try {
+                                const dirHandle = await window.showDirectoryPicker();
+                                this.currentPath = dirHandle;
+                                await this.displayFileTree(dirHandle, this.fileTree);
+                            } catch (err) {
+                                console.error('打开文件夹失败:', err);
+                                alert('打开文件夹失败: ' + err.message);
                             }
-                            return a.name.localeCompare(b.name);
                         });
 
-                        for (const entry of entries) {
-                            const item = document.createElement('div');
-                            item.classList.add(entry.kind === 'file' ? 'file-item' : 'folder-item');
-                            item.dataset.name = entry.name;
 
-                            const itemContent = document.createElement('div');
-                            itemContent.className = 'item-content';
 
-                            const icon = document.createElement('span');
-                            icon.className = entry.kind === 'file' ? 'file-icon' : 'folder-icon';
-                            icon.textContent = entry.kind === 'file' ? '📄' : '📁';
-                            itemContent.appendChild(icon);
 
-                            const name = document.createElement('span');
-                            name.className = 'item-name';
-                            name.textContent = entry.name;
-                            itemContent.appendChild(name);
 
-                            item.appendChild(itemContent);
+                        // 编辑器内容变化时更新预览
+                        this.notepad.addEventListener('input', () => {
+                            this.preview.innerHTML = marked.parse(this.notepad.value);
+                        });
 
-                            if (entry.kind === 'directory') {
-                                const folderContent = document.createElement('div');
-                                folderContent.className = 'folder-content';
-                                item.appendChild(folderContent);
+                        console.log('Event listeners setup completed'); // 添加调试日志
+                    }
 
-                                // 添加点击事件处理文件夹的展开/折叠
-                                itemContent.addEventListener('click', async (e) => {
-                                    e.stopPropagation();
-                                    const isExpanded = item.classList.contains('expanded');
+                    async displayFileTree(dirHandle, parentElement) {
+                        try {
+                            parentElement.innerHTML = '';
 
-                                    if (!isExpanded) {
-                                        try {
-                                            // 展开文件夹
-                                            item.classList.add('expanded');
-                                            // 递归显示子文件夹内容
-                                            await this.displayFileTree(entry, folderContent);
-                                        } catch (err) {
-                                            console.error('展开文件夹失败:', err);
-                                            item.classList.remove('expanded');
-                                        }
-                                    } else {
-                                        // 折叠文件夹
-                                        item.classList.remove('expanded');
-                                        folderContent.innerHTML = '';
-                                    }
-                                });
-                            } else {
-                                // 添加点击事件处理文件的打开
-                                itemContent.addEventListener('click', async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                        // 获取文件内容
-                                        const file = await entry.getFile();
-                                        const content = await file.text();
-
-                                        // 更新编辑器和预览
-                                        const notepad = document.getElementById('notepad');
-                                        const preview = document.getElementById('preview');
-
-                                        if (notepad && preview) {
-                                            notepad.value = content;
-                                            preview.innerHTML = marked.parse(content);
-
-                                            // 保存当前文件信息到全局对象
-                                            window.mymarkdowneditor.currentFileName = entry.name;
-                                            window.fileExplorer.currentFile = entry;
-
-                                            // 移除其他文件的活动状态
-                                            document.querySelectorAll('.file-item').forEach(item => {
-                                                item.classList.remove('active');
-                                            });
-                                            // 添加当前文件的活动状态
-                                            item.classList.add('active');
-                                        }
-                                    } catch (err) {
-                                        console.error('读���文件失败:', err);
-                                        await showMessageDialog('读取文件失败: ' + err.message);
-                                    }
-                                });
+                            const entries = [];
+                            for await (const entry of dirHandle.values()) {
+                                entries.push(entry);
                             }
 
-                            parentElement.appendChild(item);
+                            // 排序：文件夹在前，文件在后
+                            entries.sort((a, b) => {
+                                if (a.kind !== b.kind) {
+                                    return a.kind === 'directory' ? -1 : 1;
+                                }
+                                return a.name.localeCompare(b.name);
+                            });
+
+                            for (const entry of entries) {
+                                const item = document.createElement('div');
+                                item.classList.add(entry.kind === 'file' ? 'file-item' : 'folder-item');
+                                item.dataset.name = entry.name;
+
+                                const itemContent = document.createElement('div');
+                                itemContent.className = 'item-content';
+
+                                const icon = document.createElement('span');
+                                icon.className = entry.kind === 'file' ? 'file-icon' : 'folder-icon';
+                                icon.textContent = entry.kind === 'file' ? '📄' : '📁';
+                                itemContent.appendChild(icon);
+
+                                const name = document.createElement('span');
+                                name.className = 'item-name';
+                                name.textContent = entry.name;
+                                itemContent.appendChild(name);
+
+                                item.appendChild(itemContent);
+
+                                if (entry.kind === 'directory') {
+                                    const folderContent = document.createElement('div');
+                                    folderContent.className = 'folder-content';
+                                    item.appendChild(folderContent);
+
+                                    // 添加点击事件处理文件夹的展开/折叠
+                                    itemContent.addEventListener('click', async (e) => {
+                                        e.stopPropagation();
+                                        const isExpanded = item.classList.contains('expanded');
+
+                                        if (!isExpanded) {
+                                            try {
+                                                // 展开文件夹
+                                                item.classList.add('expanded');
+                                                // 递归显示子文件夹内容
+                                                await this.displayFileTree(entry, folderContent);
+                                            } catch (err) {
+                                                console.error('展开文件夹失败:', err);
+                                                item.classList.remove('expanded');
+                                            }
+                                        } else {
+                                            // 折叠文件夹
+                                            item.classList.remove('expanded');
+                                            folderContent.innerHTML = '';
+                                        }
+                                    });
+                                } else {
+                                    // 添加点击事件处理文件的打开
+                                    itemContent.addEventListener('click', async (e) => {
+                                        e.stopPropagation();
+                                        try {
+                                            // 获取文件内容
+                                            const file = await entry.getFile();
+                                            const content = await file.text();
+
+                                            // 更新编辑器和预览
+                                            const notepad = document.getElementById('notepad');
+                                            const preview = document.getElementById('preview');
+
+                                            if (notepad && preview) {
+                                                notepad.value = content;
+                                                preview.innerHTML = marked.parse(content);
+
+                                                // 保存当前文件信息到全局对象
+                                                window.mymarkdowneditor.currentFileName = entry.name;
+                                                window.fileExplorer.currentFile = entry;
+
+                                                // 移除其他文件的活动状态
+                                                document.querySelectorAll('.file-item').forEach(item => {
+                                                    item.classList.remove('active');
+                                                });
+                                                // 添加当前文件的活动状态
+                                                item.classList.add('active');
+                                            }
+                                        } catch (err) {
+                                            console.error('读���文件失败:', err);
+                                            await showMessageDialog('读取文件失败: ' + err.message);
+                                        }
+                                    });
+                                }
+
+                                parentElement.appendChild(item);
+                            }
+                        } catch (err) {
+                            console.error('显示文件树失败:', err);
+                            parentElement.innerHTML = `<div class="error">无法读取目录内容: ${err.message}</div>`;
                         }
-                    } catch (err) {
-                        console.error('显示文件树失败:', err);
-                        parentElement.innerHTML = `<div class="error">无法读取目录内容: ${err.message}</div>`;
                     }
+
+
                 }
 
-
+                window.FileExplorer = FileExplorer;
+                window.fileExplorer = new FileExplorer();
             }
+        });
 
-            window.FileExplorer = FileExplorer;
-            window.fileExplorer = new FileExplorer();
-        }
-    });
+        // 最后注入 sidebar.js
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['sidebar.js']
+        });
+    } catch (error) {
+        console.log("error:", error)
+    }
 
-    // 最后注入 sidebar.js
-    await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['sidebar.js']
-    });
 
 
 }
@@ -659,45 +671,49 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // 在新标签页加载完成时注入悬浮球
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url.startsWith('http')) {
-        console.log('新标签页加载完成:', tabId);
-        try {
-            // 先注入样式
-            await chrome.scripting.insertCSS({
-                target: { tabId: tab.id },
-                files: ['floatingBall.css']
-            });
+    // 获取悬浮球显示状态
+    chrome.storage.local.get(['floatingBallVisible'],  async function (result) {
+        const isFloatingBallVisible = result.floatingBallVisible !== undefined ? result.floatingBallVisible : true;
 
-            // 注入 HTML
-            const html = `
-                <div id="floating-ball-container" data-tab-id="${tabId}">
-                    <div id="md-floatingBall" class="floating-ball">
-                        <span class="ball-icon">📝</span>
+        if (changeInfo.status === 'complete' && tab.url.startsWith('http') && isFloatingBallVisible) {
+            try {
+                // 注入样式
+                await chrome.scripting.insertCSS({
+                    target: { tabId: tab.id },
+                    files: ['floatingBall.css']
+                });
+
+                // 注入 HTML
+                const html = `
+                    <div id="floating-ball-container" data-tab-id="${tabId}">
+                        <div id="md-floatingBall" class="floating-ball">
+                            <span class="ball-icon">📝</span>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: (htmlContent, tab) => {
-                    if (!document.getElementById('floating-ball-container')) {
-                        const container = document.createElement('div');
-                        container.innerHTML = htmlContent;
-                        document.body.appendChild(container.firstElementChild);
-                    }
-                    const floatingBall = document.getElementById('md-floatingBall');
-                    if (floatingBall) {
-                        floatingBall.addEventListener('click', () => {
-                            chrome.runtime.sendMessage({ action: 'toggleSidebar', visible: true });
-                        });
-                    }
-                },
-                args: [html, tab]
-            });
-        } catch (error) {
-            console.error('注入悬浮球失败:', error);
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: (htmlContent, tab) => {
+                        if (!document.getElementById('floating-ball-container')) {
+                            const container = document.createElement('div');
+                            container.innerHTML = htmlContent;
+                            document.body.appendChild(container.firstElementChild);
+                        }
+                        const floatingBall = document.getElementById('md-floatingBall');
+                        if (floatingBall) {
+                            floatingBall.addEventListener('click', () => {
+                                chrome.runtime.sendMessage({ action: 'toggleSidebar', visible: true });
+                            });
+                        }
+                    },
+                    args: [html, tab]
+                });
+            } catch (error) {
+                console.error('注入悬浮球失败:', error);
+            }
         }
-    }
+    });
 });
 
 // 文件操作处理函数

@@ -20,7 +20,6 @@ var TurndownService = (function () {
   }
 
   function trimTrailingNewlines(string) {
-    // avoid match-at-end regexp bottleneck, see #370
     var indexEnd = string.length;
     while (indexEnd > 0 && string[indexEnd - 1] === '\n') indexEnd--;
     return string.substring(0, indexEnd)
@@ -1162,14 +1161,24 @@ window.TurndownService.use(turndownPluginGfm.gfm);
 
 
 
-// 自定义标题规则，保留点号并移除不必要的转义
+// 自定义标题规则，处理包含 <strong> 的标题，并且分成新行
 window.TurndownService.addRule('customHeading', {
   filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], // 匹配标题标签
   replacement: function (content, node) {
     const level = node.tagName.charAt(1); // 获取标题等级
-    // 保留 "1." 格式，移除多余的转义
-    const sanitizedContent = content.replace(/\\\./g, '.').trim(); // 修正被转义的点号
-    return `${'#'.repeat(level)} ${sanitizedContent}`; // 返回 Markdown 格式标题
+    let sanitizedContent = content.replace(/\\\./g, '.').trim(); // 修正被转义的点号
+    
+    // 将 <strong> 标签内容转换为加粗，并处理分行
+    sanitizedContent = sanitizedContent.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
+
+    // 如果是多行标题，第一行标题处理后，后续内容另起一行
+    const lines = sanitizedContent.split('###');
+    let markdownContent = `##${'#'.repeat(level)} ${lines[0].trim()}\n`;
+    if (lines.length > 1) {
+      markdownContent += `\n### **${lines[1].trim()}**`;  // 处理第二行标题
+    }
+    
+    return markdownContent; // 返回 Markdown 格式标题
   }
 });
 
@@ -1185,10 +1194,10 @@ window.TurndownService.addRule('codeBlock', {
     
     // 如果有语言类型，转换为带语言的代码块
     if (language) {
-      return `\n\`\`\`${language}\n${codeContent}\n\`\`\``;
+      return `\n\`\`\`${language}\n${codeContent}\n\`\`\`\n---\n`;
     }
     
     // 如果没有语言类型，直接使用普通代码块
-    return `\n\`\`\`\n${codeContent}\n\`\`\``;
+    return `\n\`\`\`\n${codeContent}\n\`\`\`\n---\n`;
   }
 });

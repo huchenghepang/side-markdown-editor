@@ -8,8 +8,15 @@ if (!window.mymarkdowneditor) {
 // 在开头添加检查
 function ensureFileExplorer() {
     if (!window.fileExplorer && window.FileExplorer) {
+        console.log("执行")
         window.fileExplorer = new FileExplorer();
     }
+}
+
+
+/* 全局控制显示悬浮按钮 点击切换是否需要全局显示 还是通过浏览器工具栏图标切换显示 */
+function toggleGlobalSettingFloatingButton() {
+
 }
 
 function initialize() {
@@ -27,6 +34,9 @@ function initialize() {
     const editorSection = document.getElementById('editorSection');
     const previewSection = document.getElementById('previewSection');
     const createNewArticle = document.getElementById('createNewArticle');
+    const toggleFloatingBallBtn = document.getElementById("toggleFloatingBallGlobal");
+    /* 可拖动元素 */
+    const dragableElements = document.getElementsByClassName("dragable-md-editor")
     // 尺寸控制
     const sizeButtons = {
         small: document.getElementById('sizeSmall'),
@@ -116,11 +126,104 @@ function initialize() {
         createNewArticle.addEventListener('click', createNewArticleHandler)
     }
 
+
+    /* 切换全局悬浮按钮设置 */
+
+
+    // 读取 storage 中保存的 floatingBallVisible 值
+    chrome.storage.local.get(['floatingBallVisible'], function (result) {
+        const isFloatingBallVisible = result.floatingBallVisible !== undefined ? result.floatingBallVisible : true;
+
+        // 设置按钮的初始状态（根据 chrome.storage.local 中的值）
+        if (isFloatingBallVisible) {
+            toggleFloatingBallBtn.textContent = "隐藏悬浮按钮";
+        } else {
+            toggleFloatingBallBtn.textContent = "显示悬浮按钮";
+        }
+
+        // 监听按钮点击，切换浮动按钮的显示状态
+        toggleFloatingBallBtn.addEventListener("click", function () {
+            const newVisibility = !isFloatingBallVisible;
+            chrome.storage.local.set({ "floatingBallVisible": newVisibility }, function () {
+                // 切换按钮文本
+                toggleFloatingBallBtn.textContent = newVisibility ? "隐藏悬浮按钮" : "显示悬浮按钮";
+
+                // 发送事件，通知其他页面（或背景脚本）更新悬浮按钮的显示状态
+                window.dispatchEvent(new Event('toggleFloatingButton'));
+            });
+        });
+    });
+
+    /* 拖动效果 */
+    if(dragableElements){
+        Array.from(dragableElements).forEach(dragableElement=>{
+            dragableElement.onmousedown = dragableEventHandler;
+            dragableElement.ondragstart  = function(){
+                return false
+            }
+        })
+    }
+
     // 初始化拖动调整功能
     initializeResizers();
 
     initializeToolbar();
+    initializeTopResizer()
 }
+/* 拖动函数 */
+function dragableEventHandler(event) {
+    const header = event.target;
+    header.classList.add("dragging-md-editor")
+    const parentElement = header.closest("#markdown-sidebar-container");
+    if (!parentElement) return;
+
+    // 确保 parentElement 采用 fixed 定位（以视口为参考系）
+    if (window.getComputedStyle(parentElement).position !== "fixed") {
+        parentElement.style.position = "fixed";
+    }
+    parentElement.style.zIndex = 1000;
+
+
+    // 获取元素当前位置，计算鼠标点击时相对于元素左上角的偏移量
+    const parentRect = parentElement.getBoundingClientRect();
+    const shiftX = event.clientX - parentRect.left;
+    const shiftY = event.clientY - parentRect.top;
+
+    function moveAt(clientX, clientY) {
+        // 直接用鼠标 client 坐标计算新的 left 和 top
+        const newLeft = clientX - shiftX;
+        let newTop = clientY - shiftY;
+        parentElement.style.left = newLeft + "px";
+        parentElement.style.top = newTop + "px";
+    }
+
+    // 初次点击时更新位置
+    moveAt(event.clientX, event.clientY);
+
+    function onMouseMove(e) {
+        moveAt(e.clientX, e.clientY);
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+
+    function onMouseUp() {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        header.classList.remove("dragging-md-editor")
+        if (parentElement.getBoundingClientRect().top < 0) {
+            parentElement.style.top = 0
+        }
+
+        if(parentElement.getBoundingClientRect().left <0){
+            parentElement.style.left = 0
+        }
+        
+    }
+
+    document.addEventListener("mouseup", onMouseUp);
+}
+
+
 
 function toggleSection(button, section) {
     if (!button || !section) return;
@@ -221,7 +324,12 @@ function updateSizeButtons(size, sizeButtons) {
 }
 
 function saveSidebarSize(size) {
-    chrome.storage.local.set({ sidebarSize: size });
+    try {
+        chrome.storage.local.set({ sidebarSize: size });
+    } catch (error) {
+        console.error
+    }
+
 }
 
 function saveViewState() {
@@ -880,6 +988,53 @@ class FileExplorer {
 
 }
 
+function initializeTopResizer() {
+    const sidebarContainer = document.querySelector('.md-sidebar');
+    if (!sidebarContainer) return;
+
+    // 创建顶部拖动条
+    const topResizer = document.createElement('div');
+    topResizer.classList.add('top-resizer');
+    sidebarContainer.insertBefore(topResizer, sidebarContainer.firstChild);
+
+    let isResizing = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    topResizer.style.cursor = 'ns-resize'; 
+
+    // 监听鼠标按下事件
+    topResizer.addEventListener('mousedown', function (e) {
+        isResizing = true;
+        startY = e.clientY; // 鼠标初始位置
+        startHeight = sidebarContainer.offsetHeight; // 初始高度
+        document.body.classList.add('disable-selection'); // 防止页面文本选择
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', stopResizing);
+    });
+
+    // 处理鼠标拖动
+    function handleMouseMove(e) {
+        if (!isResizing) return;
+
+        const viewportHeight = window.innerHeight; // 获取视口高度
+        const newHeight = startHeight + (startY - e.clientY); // 计算新的高度
+
+        // 将高度限制在 100px 到视口高度之间
+        sidebarContainer.style.height = `${Math.max(Math.min(newHeight, viewportHeight), 100)}px`;
+    }
+
+    // 停止拖动
+    function stopResizing() {
+        isResizing = false;
+        document.body.classList.remove('disable-selection');
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', stopResizing);
+    }
+}
+
+
+
 // 添加确认对话框函数
 async function showConfirmDialog(message) {
     return new Promise((resolve) => {
@@ -925,7 +1080,9 @@ async function chatgptCovrtMarkdown() {
         }
 
         const htmlElements = document.querySelectorAll('.markdown');
-        const content = batchHtmlCovrtMarkdown(htmlElements).join('\n\n');
+        /* 排除的指定类名列表 */
+        const excludeClasses = ["dark:border-token-text-secondary","border-token-text-secondary","first:mt-0"]; // 要排除的类名
+        const content = batchHtmlConvertMarkdown(htmlElements, excludeClasses).join('\n\n');
         await createNewArticleHandler();
         const notepad = document.getElementById('notepad');
         const preview = document.getElementById('preview');
@@ -942,8 +1099,19 @@ async function chatgptCovrtMarkdown() {
 
 
 
-/* 批量转换html内容为markdown */
-function batchHtmlCovrtMarkdown(htmlElements) {
-    const markdownBlocks = Array.from(htmlElements).map((elem) => window.TurndownService.turndown(elem) + "\n\n");
-    return markdownBlocks
+
+
+/* 批量转换html内容为markdown，排除指定类名的元素 */
+function batchHtmlConvertMarkdown(htmlElements, excludeClassNames = []) {
+    const markdownBlocks = Array.from(htmlElements).map((elem) => {
+        // 检查元素是否包含排除的类名
+        if (excludeClassNames.some(className => elem.classList.contains(className))) {
+            return ''; // 如果包含指定类名，跳过转换，返回空字符串
+        }
+        // 否则进行转换
+        return window.TurndownService.turndown(elem) + "\n\n";
+    }).filter(block => block !== ''); // 过滤掉空字符串
+
+    return markdownBlocks;
 }
+

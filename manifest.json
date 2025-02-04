@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "智能Markdown助手（支持ChatGPT）",
-  "version": "1.0",
+  "version": "1.0.2",
   "description": "一款功能强大的侧边栏Markdown编辑器，支持ChatGPT智能助手，提供快速编辑和预览markdown等功能，让您的Markdown书写更高效！",
   "author": "Jeff",
   "permissions": [

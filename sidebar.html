@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
 </head>
 <body>
+  <div class="top-resizer"></div> <!-- 顶部拖动条 -->
   <div class="md-sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-header dragable-md-editor">
       <h3 class="md-sidebar-title"><span id="md-sidebar-close" class="md-sidebar-close" class="icon">❌&nbsp;</span>笔记本<span class="icon">📒</span></h3>
       <div class="view-controls">
         <button id="toggleFileExplorer"  class="view-control-btn active" title="显示/隐藏文件目录">
@@ -89,6 +90,11 @@
           <span class="icon">📥</span>
           导入chatgpt
         </button>
+        <div class="view-controls">
+          <button id="toggleFloatingBallGlobal" class="view-control-btn" title="显示/隐藏悬浮按钮">
+            <span class="icon">⚙️</span>
+          </button>
+        </div>
       </div>
     </div>
     <div class="sidebar-resizer"></div>
