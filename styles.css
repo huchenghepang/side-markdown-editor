@@ -1,5 +1,3 @@
-
-
 .sidebar-resizer {
     position: absolute;
     left: 0;
@@ -12,7 +10,7 @@
 }
 
 /* 拖动中 */
-.dragging-md-editor{
+.dragging-md-editor {
     cursor: grab;
 }
 
@@ -30,7 +28,8 @@
     left: 0;
     top: 0;
     height: 100%;
-    width: 50%;  /* 默认宽度 */
+    width: 50%;
+    /* 默认宽度 */
     background: #fff;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     transition: width 0.1s ease;
@@ -137,19 +136,6 @@
     background-color: #333;
 }
 
-#saveBtn {
-    margin-top: 10px;
-    padding: 8px 15px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#saveBtn:hover {
-    background: #45a049;
-}
 
 .file-explorer {
     width: 100%;
@@ -243,7 +229,7 @@
     z-index: 9999;
     height: 100vh;
     display: flex;
-    flex-direction:column-reverse;
+    flex-direction: column-reverse;
 }
 
 .md-sidebar {
@@ -399,11 +385,9 @@
     background: #888;
     border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
-
 /* 确保内容区域正确响应宽度变化 */
 .editor-container {
     width: 100%;
@@ -412,7 +396,6 @@
     flex-direction: column;
     overflow: hidden;
 }
-
 .editor-section,
 .preview-section {
     width: 100%;
@@ -420,44 +403,37 @@
     overflow-y: auto;
     background-color: #333;
 }
-
 /* 优化文件树样式 */
 .file-explorer {
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }
-
 /* 优化按钮组样式 */
 .button-group {
     width: 100%;
     flex-shrink: 0;
 }
-
 /* 当侧边栏折叠时保持拖动功能 */
 .sidebar.collapsed {
     transform: translateX(calc(100% - 4px));
 }
-
 .sidebar.collapsed::before {
     width: 4px;
     background: #f0f0f0;
 }
-
 /* 优化文本编辑器和预览区域的滚动 */
 #notepad,
 .preview-section {
     overflow-y: auto;
     overflow-x: hidden;
 }
-
 /* 确保内容不会溢出 */
 .item-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 /* 视图控制按钮样式 */
 .view-controls {
     display: flex;
@@ -492,7 +468,8 @@
 .main-container {
     display: flex;
     position: relative;
-    height: calc(100% - 100px); /* 减去header和button-group的高度 */
+    height: calc(100% - 100px);
+    /* 减去header和button-group的高度 */
     overflow: hidden;
 }
 
@@ -500,7 +477,8 @@
 .section {
     position: relative;
     height: 100%;
-    min-width: 0; /* 允许区域缩小 */
+    min-width: 0;
+    /* 允许区域缩小 */
 }
 
 /* 隐藏状态 */
@@ -658,21 +636,26 @@
 
 /* 文件树样式 */
 .folder-content {
-    margin-left: 20px; /* 缩进子项 */
-    border-left: 1px dotted #555; /* 添加垂直连接线 */
+    margin-left: 20px;
+    /* 缩进子项 */
+    border-left: 1px dotted #555;
+    /* 添加垂直连接线 */
     padding-left: 5px;
 }
 
-.file-item, .folder-item {
+.file-item,
+.folder-item {
     padding: 4px 8px;
     cursor: pointer;
-    display: block; /* 改为块级显示 */
+    display: block;
+    /* 改为块级显示 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.file-item:hover, .folder-item:hover {
+.file-item:hover,
+.folder-item:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -682,7 +665,8 @@
     gap: 5px;
 }
 
-.file-icon, .folder-icon {
+.file-icon,
+.folder-icon {
     width: 16px;
     text-align: center;
     font-size: 12px;
@@ -701,12 +685,14 @@
     transition: max-height 0.3s ease-out;
 }
 
-.folder-item.expanded > .folder-content {
-    max-height: 1000px; /* 或者更大的值，取决于内容 */
+.folder-item.expanded>.folder-content {
+    max-height: 1000px;
+    /* 或者更大的值，取决于内容 */
 }
 
 /* 活动项目高亮 */
-.file-item.active, .folder-item.active {
+.file-item.active,
+.folder-item.active {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
@@ -1153,7 +1139,7 @@
 }
 
 
-#previewSection{
+#previewSection {
     background-color: #555;
 }
 
@@ -1180,7 +1166,8 @@
 .main-container {
     display: flex;
     position: relative;
-    height: calc(100% - 100px); /* 减去header和button-group的高度 */
+    height: calc(100% - 100px);
+    /* 减去header和button-group的高度 */
     overflow: hidden;
 }
 
@@ -1188,7 +1175,8 @@
 .section {
     position: relative;
     height: 100%;
-    min-width: 0; /* 允许区域缩小 */
+    min-width: 0;
+    /* 允许区域缩小 */
 }
 
 /* 文件浏览器区域 */
@@ -1309,7 +1297,7 @@
 
 .toolbar-btn:hover {
     background: #e0e0e0;
-    
+
     border-color: #bbb;
 }
 
@@ -1358,12 +1346,29 @@
 }
 
 /* 预览时的标题样式 */
-.markdown-body h1 { font-size: 2em; }
-.markdown-body h2 { font-size: 1.5em; }
-.markdown-body h3 { font-size: 1.25em; }
-.markdown-body h4 { font-size: 1em; }
-.markdown-body h5 { font-size: 0.875em; }
-.markdown-body h6 { font-size: 0.85em; }
+.markdown-body h1 {
+    font-size: 2em;
+}
+
+.markdown-body h2 {
+    font-size: 1.5em;
+}
+
+.markdown-body h3 {
+    font-size: 1.25em;
+}
+
+.markdown-body h4 {
+    font-size: 1em;
+}
+
+.markdown-body h5 {
+    font-size: 0.875em;
+}
+
+.markdown-body h6 {
+    font-size: 0.85em;
+}
 
 /* 右键菜单样式 */
 .context-menu {
@@ -1401,7 +1406,8 @@
 }
 
 /* 文件树项目激活状态 */
-.file-item.active, .folder-item.active {
+.file-item.active,
+.folder-item.active {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -1412,7 +1418,7 @@
 }
 
 
-.my-control-btn{
+.my-control-btn {
     width: 200px;
     height: 60px;
 }
@@ -1421,7 +1427,6 @@
 
 /* 代码区域的样式 */
 
-pre{
+pre {
     background-color: #333 !important;
 }
-

@@ -971,16 +971,12 @@ var TurndownService = (function () {
   return TurndownService;
 
 }());
-
-
-
-
 var turndownPluginGfm = (function (exports) {
   'use strict';
-  
+
   var highlightRegExp = /highlight-(?:text|source)-([a-z0-9]+)/;
-  
-  function highlightedCodeBlock (turndownService) {
+
+  function highlightedCodeBlock(turndownService) {
     turndownService.addRule('highlightedCodeBlock', {
       filter: function (node) {
         var firstChild = node.firstChild;
@@ -994,7 +990,7 @@ var turndownPluginGfm = (function (exports) {
       replacement: function (content, node, options) {
         var className = node.className || '';
         var language = (className.match(highlightRegExp) || [null, ''])[1];
-  
+
         return (
           '\n\n' + options.fence + language + '\n' +
           node.firstChild.textContent +
@@ -1003,8 +999,8 @@ var turndownPluginGfm = (function (exports) {
       }
     });
   }
-  
-  function strikethrough (turndownService) {
+
+  function strikethrough(turndownService) {
     turndownService.addRule('strikethrough', {
       filter: ['del', 's', 'strike'],
       replacement: function (content) {
@@ -1012,67 +1008,67 @@ var turndownPluginGfm = (function (exports) {
       }
     });
   }
-  
+
   var indexOf = Array.prototype.indexOf;
   var every = Array.prototype.every;
   var rules = {};
-  
+
   rules.tableCell = {
     filter: ['th', 'td'],
     replacement: function (content, node) {
       return cell(content, node)
     }
   };
-  
+
   rules.tableRow = {
     filter: 'tr',
     replacement: function (content, node) {
       var borderCells = '';
       var alignMap = { left: ':--', right: '--:', center: ':-:' };
-  
+
       if (isHeadingRow(node)) {
         for (var i = 0; i < node.childNodes.length; i++) {
           var border = '---';
           var align = (
             node.childNodes[i].getAttribute('align') || ''
           ).toLowerCase();
-  
+
           if (align) border = alignMap[align] || border;
-  
+
           borderCells += cell(border, node.childNodes[i]);
         }
       }
       return '\n' + content + (borderCells ? '\n' + borderCells : '')
     }
   };
-  
+
   rules.table = {
     // Only convert tables with a heading row.
     // Tables with no heading row are kept using `keep` (see below).
     filter: function (node) {
       return node.nodeName === 'TABLE' && isHeadingRow(node.rows[0])
     },
-  
+
     replacement: function (content) {
       // Ensure there are no blank lines
       content = content.replace('\n\n', '\n');
       return '\n\n' + content + '\n\n'
     }
   };
-  
+
   rules.tableSection = {
     filter: ['thead', 'tbody', 'tfoot'],
     replacement: function (content) {
       return content
     }
   };
-  
+
   // A tr is a heading row if:
   // - the parent is a THEAD
   // - or if its the first child of the TABLE or the first TBODY (possibly
   //   following a blank THEAD)
   // - and every cell is a TH
-  function isHeadingRow (tr) {
+  function isHeadingRow(tr) {
     var parentNode = tr.parentNode;
     return (
       parentNode.nodeName === 'THEAD' ||
@@ -1083,8 +1079,8 @@ var turndownPluginGfm = (function (exports) {
       )
     )
   }
-  
-  function isFirstTbody (element) {
+
+  function isFirstTbody(element) {
     var previousSibling = element.previousSibling;
     return (
       element.nodeName === 'TBODY' && (
@@ -1096,22 +1092,22 @@ var turndownPluginGfm = (function (exports) {
       )
     )
   }
-  
-  function cell (content, node) {
+
+  function cell(content, node) {
     var index = indexOf.call(node.parentNode.childNodes, node);
     var prefix = ' ';
     if (index === 0) prefix = '| ';
     return prefix + content + ' |'
   }
-  
-  function tables (turndownService) {
+
+  function tables(turndownService) {
     turndownService.keep(function (node) {
       return node.nodeName === 'TABLE' && !isHeadingRow(node.rows[0])
     });
     for (var key in rules) turndownService.addRule(key, rules[key]);
   }
-  
-  function taskListItems (turndownService) {
+
+  function taskListItems(turndownService) {
     turndownService.addRule('taskListItems', {
       filter: function (node) {
         return node.type === 'checkbox' && node.parentNode.nodeName === 'LI'
@@ -1121,8 +1117,8 @@ var turndownPluginGfm = (function (exports) {
       }
     });
   }
-  
-  function gfm (turndownService) {
+
+  function gfm(turndownService) {
     turndownService.use([
       highlightedCodeBlock,
       strikethrough,
@@ -1130,44 +1126,35 @@ var turndownPluginGfm = (function (exports) {
       taskListItems
     ]);
   }
-  
+
   exports.gfm = gfm;
   exports.highlightedCodeBlock = highlightedCodeBlock;
   exports.strikethrough = strikethrough;
   exports.tables = tables;
   exports.taskListItems = taskListItems;
-  
+
   return exports;
-  
-  }({}));
-  
 
-
+}({}));
 window.TurndownService = new TurndownService({
   bulletListMarker: '-',  // 无序列表标记符改为 '-'
   codeBlockStyle: 'fenced', // 代码块样式使用围栏风格
   headingStyle: 'atx',     // 标题风格使用 '#'
   emDelimiter: '*',         // 斜体符号改为 '*'
   strongDelimiter: '**',   // 加粗符号改为 '**'
-  linkStyle:'inlined',
+  linkStyle: 'inlined',
   hr: '---',
   fence: '```'                // 代码块围栏符号
 });
-
-
 /* 支持表格转换 */
 window.TurndownService.use(turndownPluginGfm.gfm);
-
-
-
-
 // 自定义标题规则，处理包含 <strong> 的标题，并且分成新行
 window.TurndownService.addRule('customHeading', {
   filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], // 匹配标题标签
   replacement: function (content, node) {
     const level = node.tagName.charAt(1); // 获取标题等级
     let sanitizedContent = content.replace(/\\\./g, '.').trim(); // 修正被转义的点号
-    
+
     // 将 <strong> 标签内容转换为加粗，并处理分行
     sanitizedContent = sanitizedContent.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
 
@@ -1177,27 +1164,63 @@ window.TurndownService.addRule('customHeading', {
     if (lines.length > 1) {
       markdownContent += `\n### **${lines[1].trim()}**`;  // 处理第二行标题
     }
-    
+
     return markdownContent; // 返回 Markdown 格式标题
   }
 });
-
-
-
-
-window.TurndownService.addRule('codeBlock', {
-  filter: 'pre',  // 过滤 pre 标签
-  replacement: function(content, node) {
-    
-    const language = content.split('\n')[2];
-    const codeContent = node.querySelector('code').textContent.trim(); // 获取 code 标签内的代码内容
-    
-    // 如果有语言类型，转换为带语言的代码块
-    if (language) {
-      return `\n\`\`\`${language}\n${codeContent}\n\`\`\`\n---\n`;
-    }
-    
-    // 如果没有语言类型，直接使用普通代码块
-    return `\n\`\`\`\n${codeContent}\n\`\`\`\n---\n`;
+/* 根据url判断网站 */
+window.getWebSiteByUrl = function () {
+  const url = window.location.href;
+  // 使用 if-else 语句判断 url 是否包含特定字符串
+  if (url.includes("chatgpt.com")) {
+    return 1;
+  } else if (url.includes("chat.deepseek.com")) {
+    return 2;
+  } else {
+    return 0;
+  }
+}
+/* 处理deepseek代码包含块规则 */
+window.TurndownService.addRule('deepseekCodeBlock', {
+  filter: function (node) {
+    return node.nodeName === 'DIV' && node.classList.contains('md-code-block-infostring');
+  },
+  replacement: function (content, node) {
+    return `\`\`\`${content}`;
   }
 });
+
+window.TurndownService.addRule('deepseekCodeBlockAction', {
+  filter: function (node) {
+    return node.nodeName === 'DIV' && node.classList.contains('md-code-block-action');
+  },
+  replacement: function (content, node) {
+    return '';
+  }
+});
+window.TurndownService.addRule('codeBlock', {
+  filter: 'pre',  // 过滤 pre 标签
+  replacement: function (content, node) {
+    switch (getWebSiteByUrl()) {
+      case 1:
+        /* 处理chatgpt逻辑 */
+        const language = content.split('\n')[2];
+
+        const codeContent = node.querySelector('code').textContent.trim(); // 获取 code 标签内的代码内容
+        // 如果有语言类型，转换为带语言的代码块
+        if (language) {
+          return `\n\`\`\`${language}\n${codeContent}\n\`\`\`\n---\n`;
+        }
+        // 如果没有语言类型，直接使用普通代码块
+        return `\n\`\`\`\n${codeContent}\n\`\`\`\n---\n`;
+      case 2:
+        /* 处理deepseek */
+        return `${content}\n\`\`\`\n---\n`;
+      default:
+        break;
+    }
+    return '---'
+  }
+});
+
+

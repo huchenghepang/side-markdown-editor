@@ -79,8 +79,7 @@ async function injectResources(tab) {
             const currentTab = tabs[0];
             const url = currentTab.url;
 
-            if (url.includes('chatgpt.com')) {
-                console.log('当前网站是 ChatGPT 官网');
+            if (url.includes('chatgpt.com')  ||url.includes('chat.deepseek.com')) {
 
                 // 注入脚本
                 chrome.scripting.executeScript({

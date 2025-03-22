@@ -660,7 +660,7 @@ function initializeResizers() {
     const previewSection = document.getElementById('previewSection');
     const sidebar = document.querySelector('.md-sidebar');
     const mdChatgptTomarkdown = document.getElementById('md-chatgptTomarkdown');
-
+    const deepseekToMarkdown = document.getElementById('md-deepseekToMarkdown');
     /*  */
 
     let isResizing = false;
@@ -812,6 +812,11 @@ function initializeResizers() {
     /* 绑定点击chatgpt转markdown的事件 */
     if (mdChatgptTomarkdown) {
         mdChatgptTomarkdown.addEventListener('click', chatgptCovrtMarkdown);
+    }
+
+    /* 绑定点击deepseek转Markdown的事件 */
+    if (deepseekToMarkdown){
+        deepseekToMarkdown.addEventListener("click",deepseekCovrtMarkdown); 
     }
 }
 
@@ -1083,6 +1088,33 @@ async function chatgptCovrtMarkdown() {
         /* 排除的指定类名列表 */
         const excludeClasses = ["dark:border-token-text-secondary","border-token-text-secondary","first:mt-0"]; // 要排除的类名
         const content = batchHtmlConvertMarkdown(htmlElements, excludeClasses).join('\n\n');
+        await createNewArticleHandler();
+        const notepad = document.getElementById('notepad');
+        const preview = document.getElementById('preview');
+        if (notepad && preview) {
+            notepad.value = content;
+            preview.innerHTML = window.marked.parse(content);
+        }
+    } catch (error) {
+        console.log(error)
+        showConfirmDialog("转换失败")
+    }
+
+}
+
+/* 点击触发转换deepseek转markdown */
+async function deepseekCovrtMarkdown() {
+    try {
+        /* 判断当前网站是否是deepseek官网 */
+        const url = window.location.href;
+        if (!url.includes('chat.deepseek.com')) {
+            showMessageDialog("请在deepseek官网进行转换")
+            return
+        }
+
+        const htmlElements = document.querySelectorAll('.ds-markdown--block');
+       
+        const content = batchHtmlConvertMarkdown(htmlElements).join('\n\n');
         await createNewArticleHandler();
         const notepad = document.getElementById('notepad');
         const preview = document.getElementById('preview');
